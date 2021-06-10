@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
 	db "github.com/moeabdol/bookstore-api-golang/db/sqlc"
 	"github.com/moeabdol/bookstore-api-golang/routes"
 	"github.com/moeabdol/bookstore-api-golang/utils"
