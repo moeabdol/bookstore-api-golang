@@ -27,6 +27,24 @@ func (q *Queries) CreateBook(ctx context.Context, title string) (Book, error) {
 	return i, err
 }
 
+const getBook = `-- name: GetBook :one
+SELECT id, title, created_at, updated_at FROM books
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetBook(ctx context.Context, id int64) (Book, error) {
+	row := q.db.QueryRowContext(ctx, getBook, id)
+	var i Book
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listBooks = `-- name: ListBooks :many
 SELECT id, title, created_at, updated_at FROM books
 ORDER BY created_at

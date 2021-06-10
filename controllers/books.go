@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	db "github.com/moeabdol/bookstore-api-golang/db/sqlc"
 	"github.com/moeabdol/bookstore-api-golang/utils"
 	log "github.com/sirupsen/logrus"
@@ -23,10 +24,12 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 	result, err := db.DB.CreateBook(r.Context(), book.Title)
 	if err != nil {
 		utils.Log.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(result)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
 }
 
 // ListBooks function - GET /books
@@ -56,8 +59,27 @@ func ListBooks(w http.ResponseWriter, r *http.Request) {
 	books, err := db.DB.ListBooks(r.Context(), listBooksParams)
 	if err != nil {
 		utils.Log.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(books)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(books)
+}
+
+// GetBook function - GET /books/{id}
+func GetBook(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	bookID := utils.StrToInt64(id)
+
+	utils.Log.Debugf("%s %s - controllers/books.go - GetBook() -", r.Method, r.URL)
+
+	book, err := db.DB.GetBook(r.Context(), bookID)
+	if err != nil {
+		utils.Log.Error(err)
+		w.WriteHeader(http.StatusNotFound)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(book)
+	}
 }
