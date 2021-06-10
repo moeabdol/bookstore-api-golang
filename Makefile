@@ -12,6 +12,12 @@ createdb:
 dropdb:
 	docker container exec -it postgres dropdb --username=${DB_USER} ${DB_NAME}
 
+startdb:
+	docker container start postgres
+
+stopdb:
+	docker container stop postgres
+
 migrateup:
 	migrate -path db/migrations -database "${DB_DIALECT}://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSLMODE}" -verbose up
 
@@ -21,4 +27,4 @@ migratedown:
 sqlc:
 	sqlc generate
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc
+.PHONY: postgres createdb dropdb startdb stopdb migrateup migratedown sqlc
