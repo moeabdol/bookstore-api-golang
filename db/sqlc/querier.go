@@ -8,6 +8,7 @@ import (
 
 type Querier interface {
 	CreateBook(ctx context.Context, title string) (Book, error)
+	ListBooks(ctx context.Context, arg ListBooksParams) ([]Book, error)
 }
 
 var _ Querier = (*Queries)(nil)

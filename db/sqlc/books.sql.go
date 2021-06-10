@@ -26,3 +26,43 @@ func (q *Queries) CreateBook(ctx context.Context, title string) (Book, error) {
 	)
 	return i, err
 }
+
+const listBooks = `-- name: ListBooks :many
+SELECT id, title, created_at, updated_at FROM books
+ORDER BY created_at
+LIMIT $1
+OFFSET $2
+`
+
+type ListBooksParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListBooks(ctx context.Context, arg ListBooksParams) ([]Book, error) {
+	rows, err := q.db.QueryContext(ctx, listBooks, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Book{}
+	for rows.Next() {
+		var i Book
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
