@@ -8,4 +8,4 @@ CREATE TABLE "authors" (
 CREATE INDEX ON "authors" ("name");
 
 ALTER TABLE "books" ADD COLUMN "author_id" bigserial NOT NULL;
-ALTER TABLE "books" ADD FOREIGN KEY ("author_id") REFERENCES "authors" ("id");
+ALTER TABLE "books" ADD FOREIGN KEY ("author_id") REFERENCES "authors" ("id") ON DELETE CASCADE;
