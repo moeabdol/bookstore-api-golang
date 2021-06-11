@@ -84,3 +84,27 @@ func (q *Queries) ListBooks(ctx context.Context, arg ListBooksParams) ([]Book, e
 	}
 	return items, nil
 }
+
+const updateBook = `-- name: UpdateBook :one
+UPDATE books
+SET title = $2
+WHERE id = $1
+RETURNING id, title, created_at, updated_at
+`
+
+type UpdateBookParams struct {
+	ID    int64  `json:"id"`
+	Title string `json:"title"`
+}
+
+func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) (Book, error) {
+	row := q.db.QueryRowContext(ctx, updateBook, arg.ID, arg.Title)
+	var i Book
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

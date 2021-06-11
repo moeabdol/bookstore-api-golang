@@ -29,7 +29,6 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(result)
 	}
-
 }
 
 // ListBooks function - GET /books
@@ -64,7 +63,6 @@ func ListBooks(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(books)
 	}
-
 }
 
 // GetBook function - GET /books/{id}
@@ -72,7 +70,7 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	bookID := utils.StrToInt64(id)
 
-	utils.Log.Debugf("%s %s - controllers/books.go - GetBook() -", r.Method, r.URL)
+	utils.Log.Debugf("%s %s - controllers/books.go - GetBook()", r.Method, r.URL)
 
 	book, err := db.DB.GetBook(r.Context(), bookID)
 	if err != nil {
@@ -81,5 +79,34 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(book)
+	}
+}
+
+// UpdateBook function - PUT /books/{id}
+func UpdateBook(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	bookID := utils.StrToInt64(id)
+
+	var book db.Book
+	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
+		utils.Log.Error("Unable to decode request body")
+	}
+
+	utils.Log.WithFields(log.Fields{
+		"title": book.Title,
+	}).Debugf("%s %s - controllers/books.go - UpdateBook() -", r.Method, r.URL)
+
+	var updateBookParams = db.UpdateBookParams{
+		ID:    bookID,
+		Title: book.Title,
+	}
+
+	result, err := db.DB.UpdateBook(r.Context(), updateBookParams)
+	if err != nil {
+		utils.Log.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(result)
 	}
 }
