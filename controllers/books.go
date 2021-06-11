@@ -12,22 +12,23 @@ import (
 
 // CreateBook function - POST /books
 func CreateBook(w http.ResponseWriter, r *http.Request) {
-	var book db.Book
-	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
+	var createBookParams db.CreateBookParams
+	if err := json.NewDecoder(r.Body).Decode(&createBookParams); err != nil {
 		utils.Log.Error("Unable to decode request body")
 	}
 
 	utils.Log.WithFields(log.Fields{
-		"title": book.Title,
+		"title":     createBookParams.Title,
+		"author_id": createBookParams.AuthorID,
 	}).Debugf("%s %s - controllers/books.go - CreateBook() -", r.Method, r.URL)
 
-	result, err := db.DB.CreateBook(r.Context(), book.Title)
+	book, err := db.DB.CreateBook(r.Context(), createBookParams)
 	if err != nil {
 		utils.Log.Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(result)
+		json.NewEncoder(w).Encode(book)
 	}
 }
 

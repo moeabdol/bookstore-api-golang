@@ -1,8 +1,9 @@
 -- name: CreateBook :one
 INSERT INTO books (
-  title
+  title,
+  author_id
 ) VALUES (
-  $1
+  $1, $2
 ) RETURNING *;
 
 -- name: ListBooks :many

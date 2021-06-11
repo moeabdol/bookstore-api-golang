@@ -9,14 +9,20 @@ import (
 
 const createBook = `-- name: CreateBook :one
 INSERT INTO books (
-  title
+  title,
+  author_id
 ) VALUES (
-  $1
+  $1, $2
 ) RETURNING id, title, created_at, updated_at, author_id
 `
 
-func (q *Queries) CreateBook(ctx context.Context, title string) (Book, error) {
-	row := q.db.QueryRowContext(ctx, createBook, title)
+type CreateBookParams struct {
+	Title    string `json:"title"`
+	AuthorID int64  `json:"author_id"`
+}
+
+func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, error) {
+	row := q.db.QueryRowContext(ctx, createBook, arg.Title, arg.AuthorID)
 	var i Book
 	err := row.Scan(
 		&i.ID,
