@@ -5,6 +5,7 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const createBook = `-- name: CreateBook :one
@@ -64,8 +65,11 @@ func (q *Queries) GetBook(ctx context.Context, id int64) (Book, error) {
 }
 
 const listBooks = `-- name: ListBooks :many
-SELECT id, title, created_at, updated_at, author_id FROM books
-ORDER BY created_at
+SELECT books.id, books.title, books.created_at, books.updated_at, authors.id as author_id, authors.name as author_name
+FROM books
+INNER JOIN authors
+ON books.author_id = authors.id
+ORDER BY books.created_at
 LIMIT $1
 OFFSET $2
 `
@@ -75,21 +79,31 @@ type ListBooksParams struct {
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) ListBooks(ctx context.Context, arg ListBooksParams) ([]Book, error) {
+type ListBooksRow struct {
+	ID         int64     `json:"id"`
+	Title      string    `json:"title"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+	AuthorID   int64     `json:"author_id"`
+	AuthorName string    `json:"author_name"`
+}
+
+func (q *Queries) ListBooks(ctx context.Context, arg ListBooksParams) ([]ListBooksRow, error) {
 	rows, err := q.db.QueryContext(ctx, listBooks, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Book{}
+	items := []ListBooksRow{}
 	for rows.Next() {
-		var i Book
+		var i ListBooksRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.AuthorID,
+			&i.AuthorName,
 		); err != nil {
 			return nil, err
 		}
