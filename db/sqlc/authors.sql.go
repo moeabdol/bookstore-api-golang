@@ -27,6 +27,16 @@ func (q *Queries) CreateAuthor(ctx context.Context, name string) (Author, error)
 	return i, err
 }
 
+const deleteAuthor = `-- name: DeleteAuthor :exec
+DELETE FROM authors
+WHERE id = $1
+`
+
+func (q *Queries) DeleteAuthor(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteAuthor, id)
+	return err
+}
+
 const getAuthor = `-- name: GetAuthor :one
 SELECT id, name, created_at, updated_at FROM authors
 WHERE id = $1
@@ -86,7 +96,7 @@ func (q *Queries) ListAuthors(ctx context.Context, arg ListAuthorsParams) ([]Aut
 }
 
 const updateAuthor = `-- name: UpdateAuthor :one
-Update authors
+UPDATE authors
 SET name = $2, updated_at = now()
 WHERE id = $1
 RETURNING id, name, created_at, updated_at

@@ -110,3 +110,18 @@ func UpdateAuthor(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(result)
 	}
 }
+
+// DeleteAuthor function - DELETE /authors/{id}
+func DeleteAuthor(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	authorID := utils.StrToInt64(id)
+
+	utils.Log.Debugf("%s %s - controllers/authors.go - DeleteAuthor()", r.Method, r.URL)
+
+	if err := db.DB.DeleteAuthor(r.Context(), authorID); err != nil {
+		utils.Log.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
+}

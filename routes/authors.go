@@ -13,4 +13,5 @@ func InitializeAuthorRoutes(r *mux.Router) {
 	r.HandleFunc("/authors", controllers.ListAuthors).Methods(http.MethodGet)
 	r.HandleFunc("/authors/{id}", controllers.GetAuthor).Methods(http.MethodGet)
 	r.HandleFunc("/authors/{id}", controllers.UpdateAuthor).Methods(http.MethodPut)
+	r.HandleFunc("/authors/{id}", controllers.DeleteAuthor).Methods(http.MethodDelete)
 }
