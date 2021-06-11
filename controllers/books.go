@@ -110,3 +110,18 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(result)
 	}
 }
+
+// DeleteBook function - DELETE /books/{id}
+func DeleteBook(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	bookID := utils.StrToInt64(id)
+
+	utils.Log.Debugf("%s %s - controllers/books.go - DeleteBook()", r.Method, r.URL)
+
+	if err := db.DB.DeleteBook(r.Context(), bookID); err != nil {
+		utils.Log.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
+}

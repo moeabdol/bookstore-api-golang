@@ -27,6 +27,16 @@ func (q *Queries) CreateBook(ctx context.Context, title string) (Book, error) {
 	return i, err
 }
 
+const deleteBook = `-- name: DeleteBook :exec
+DELETE FROM books
+WHERE id = $1
+`
+
+func (q *Queries) DeleteBook(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteBook, id)
+	return err
+}
+
 const getBook = `-- name: GetBook :one
 SELECT id, title, created_at, updated_at FROM books
 WHERE id = $1

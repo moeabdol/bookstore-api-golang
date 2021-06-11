@@ -14,5 +14,6 @@ func BooksRouter() *mux.Router {
 	r.HandleFunc("/books", controllers.ListBooks).Methods(http.MethodGet)
 	r.HandleFunc("/books/{id}", controllers.GetBook).Methods(http.MethodGet)
 	r.HandleFunc("/books/{id}", controllers.UpdateBook).Methods(http.MethodPut)
+	r.HandleFunc("/books/{id}", controllers.DeleteBook).Methods(http.MethodDelete)
 	return r
 }
