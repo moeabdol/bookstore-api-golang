@@ -18,6 +18,6 @@ LIMIT 1;
 
 -- name: UpdateBook :one
 UPDATE books
-SET title = $2
+SET title = $2, updated_at = now()
 WHERE id = $1
 RETURNING *;

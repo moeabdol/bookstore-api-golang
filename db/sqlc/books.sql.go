@@ -87,7 +87,7 @@ func (q *Queries) ListBooks(ctx context.Context, arg ListBooksParams) ([]Book, e
 
 const updateBook = `-- name: UpdateBook :one
 UPDATE books
-SET title = $2
+SET title = $2, updated_at = now()
 WHERE id = $1
 RETURNING id, title, created_at, updated_at
 `
