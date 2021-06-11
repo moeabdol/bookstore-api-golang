@@ -5,6 +5,8 @@ package db
 
 import (
 	"context"
+	"encoding/json"
+	"time"
 )
 
 const createAuthor = `-- name: CreateAuthor :one
@@ -38,19 +40,46 @@ func (q *Queries) DeleteAuthor(ctx context.Context, id int64) error {
 }
 
 const getAuthor = `-- name: GetAuthor :one
-SELECT id, name, created_at, updated_at FROM authors
-WHERE id = $1
+WITH author_books AS (
+  SELECT id, title, created_at, updated_at, author_id
+  FROM books
+  WHERE author_id = $1
+  ORDER BY id
+  LIMIT $2
+  OFFSET $3
+)
+SELECT authors.id, authors.name, authors.created_at, authors.updated_at, json_agg(author_books.*) as books
+FROM authors
+LEFT JOIN author_books
+ON author_books.author_id = authors.id
+WHERE authors.id = $1
+GROUP BY authors.id
 LIMIT 1
 `
 
-func (q *Queries) GetAuthor(ctx context.Context, id int64) (Author, error) {
-	row := q.db.QueryRowContext(ctx, getAuthor, id)
-	var i Author
+type GetAuthorParams struct {
+	ID     int64 `json:"id"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type GetAuthorRow struct {
+	ID        int64           `json:"id"`
+	Name      string          `json:"name"`
+	CreatedAt time.Time       `json:"created_at"`
+	UpdatedAt time.Time       `json:"updated_at"`
+	Books     json.RawMessage `json:"books"`
+}
+
+func (q *Queries) GetAuthor(ctx context.Context, arg GetAuthorParams) (GetAuthorRow, error) {
+	row := q.db.QueryRowContext(ctx, getAuthor, arg.ID, arg.Limit, arg.Offset)
+	var i GetAuthorRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Books,
 	)
 	return i, err
 }

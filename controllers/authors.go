@@ -67,12 +67,33 @@ func ListAuthors(w http.ResponseWriter, r *http.Request) {
 
 // GetAuthor function - GET /authors/{id}
 func GetAuthor(w http.ResponseWriter, r *http.Request) {
+	limit := r.URL.Query().Get("limit")
+	if limit == "" {
+		limit = "10"
+	}
+	l := utils.StrToInt32(limit)
+
+	offset := r.URL.Query().Get("offset")
+	if offset == "" {
+		offset = "0"
+	}
+	o := utils.StrToInt32(offset) * l
+
 	id := mux.Vars(r)["id"]
 	authorID := utils.StrToInt64(id)
 
-	utils.Log.Debugf("%s %s - controllers/authors.go - GetAuthor()", r.Method, r.URL)
+	var getAuthorParams = db.GetAuthorParams{
+		ID:     authorID,
+		Limit:  l,
+		Offset: o,
+	}
 
-	author, err := db.DB.GetAuthor(r.Context(), authorID)
+	utils.Log.WithFields(log.Fields{
+		"limit":  getAuthorParams.Limit,
+		"offset": getAuthorParams.Offset,
+	}).Debugf("%s %s - controllers/authors.go - GetAuthor() -", r.Method, r.URL)
+
+	author, err := db.DB.GetAuthor(r.Context(), getAuthorParams)
 	if err != nil {
 		utils.Log.Error(err)
 		w.WriteHeader(http.StatusNotFound)
