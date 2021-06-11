@@ -81,3 +81,32 @@ func GetAuthor(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(author)
 	}
 }
+
+// UpdateAuthor function - PUT /authors/{id}
+func UpdateAuthor(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	authorID := utils.StrToInt64(id)
+
+	var author db.Author
+	if err := json.NewDecoder(r.Body).Decode(&author); err != nil {
+		utils.Log.Error("Unable to decode request body")
+	}
+
+	utils.Log.WithFields(log.Fields{
+		"name": author.Name,
+	}).Debugf("%s %s - controllers/authors.go - UpdateAuthor() -", r.Method, r.URL)
+
+	var updateAuthorParams = db.UpdateAuthorParams{
+		ID:   authorID,
+		Name: author.Name,
+	}
+
+	result, err := db.DB.UpdateAuthor(r.Context(), updateAuthorParams)
+	if err != nil {
+		utils.Log.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(result)
+	}
+}

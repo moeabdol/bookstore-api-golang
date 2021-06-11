@@ -84,3 +84,27 @@ func (q *Queries) ListAuthors(ctx context.Context, arg ListAuthorsParams) ([]Aut
 	}
 	return items, nil
 }
+
+const updateAuthor = `-- name: UpdateAuthor :one
+Update authors
+SET name = $2, updated_at = now()
+WHERE id = $1
+RETURNING id, name, created_at, updated_at
+`
+
+type UpdateAuthorParams struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
+func (q *Queries) UpdateAuthor(ctx context.Context, arg UpdateAuthorParams) (Author, error) {
+	row := q.db.QueryRowContext(ctx, updateAuthor, arg.ID, arg.Name)
+	var i Author
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

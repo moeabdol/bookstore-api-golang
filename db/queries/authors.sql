@@ -15,3 +15,9 @@ OFFSET $2;
 SELECT * FROM authors
 WHERE id = $1
 LIMIT 1;
+
+-- name: UpdateAuthor :one
+Update authors
+SET name = $2, updated_at = now()
+WHERE id = $1
+RETURNING *;
