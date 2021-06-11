@@ -16,8 +16,11 @@ LIMIT $1
 OFFSET $2;
 
 -- name: GetBook :one
-SELECT * FROM books
-WHERE id = $1
+SELECT books.id, books.title, books.created_at, books.updated_at, authors.id as author_id, authors.name as author_name
+FROM books
+INNER JOIN authors
+ON books.author_id = authors.id
+WHERE books.id = $1
 LIMIT 1;
 
 -- name: UpdateBook :one

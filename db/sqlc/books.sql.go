@@ -46,20 +46,33 @@ func (q *Queries) DeleteBook(ctx context.Context, id int64) error {
 }
 
 const getBook = `-- name: GetBook :one
-SELECT id, title, created_at, updated_at, author_id FROM books
-WHERE id = $1
+SELECT books.id, books.title, books.created_at, books.updated_at, authors.id as author_id, authors.name as author_name
+FROM books
+INNER JOIN authors
+ON books.author_id = authors.id
+WHERE books.id = $1
 LIMIT 1
 `
 
-func (q *Queries) GetBook(ctx context.Context, id int64) (Book, error) {
+type GetBookRow struct {
+	ID         int64     `json:"id"`
+	Title      string    `json:"title"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+	AuthorID   int64     `json:"author_id"`
+	AuthorName string    `json:"author_name"`
+}
+
+func (q *Queries) GetBook(ctx context.Context, id int64) (GetBookRow, error) {
 	row := q.db.QueryRowContext(ctx, getBook, id)
-	var i Book
+	var i GetBookRow
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.AuthorID,
+		&i.AuthorName,
 	)
 	return i, err
 }
