@@ -27,4 +27,7 @@ migratedown:
 sqlc:
 	sqlc generate
 
-.PHONY: postgres createdb dropdb startdb stopdb migrateup migratedown sqlc
+run:
+	nodemon --exec go run main.go --signal SIGTERM
+
+.PHONY: postgres createdb dropdb startdb stopdb migrateup migratedown sqlc run

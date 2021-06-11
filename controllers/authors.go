@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	db "github.com/moeabdol/bookstore-api-golang/db/sqlc"
 	"github.com/moeabdol/bookstore-api-golang/utils"
 	log "github.com/sirupsen/logrus"
@@ -61,5 +62,22 @@ func ListAuthors(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(authors)
+	}
+}
+
+// GetAuthor function - GET /authors/{id}
+func GetAuthor(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	authorID := utils.StrToInt64(id)
+
+	utils.Log.Debugf("%s %s - controllers/authors.go - GetAuthor()", r.Method, r.URL)
+
+	author, err := db.DB.GetAuthor(r.Context(), authorID)
+	if err != nil {
+		utils.Log.Error(err)
+		w.WriteHeader(http.StatusNotFound)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(author)
 	}
 }

@@ -27,6 +27,24 @@ func (q *Queries) CreateAuthor(ctx context.Context, name string) (Author, error)
 	return i, err
 }
 
+const getAuthor = `-- name: GetAuthor :one
+SELECT id, name, created_at, updated_at FROM authors
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetAuthor(ctx context.Context, id int64) (Author, error) {
+	row := q.db.QueryRowContext(ctx, getAuthor, id)
+	var i Author
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listAuthors = `-- name: ListAuthors :many
 SELECT id, name, created_at, updated_at FROM authors
 ORDER By name
