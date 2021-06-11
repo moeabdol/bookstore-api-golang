@@ -7,7 +7,6 @@ import (
 	db "github.com/moeabdol/bookstore-api-golang/db/sqlc"
 	"github.com/moeabdol/bookstore-api-golang/routes"
 	"github.com/moeabdol/bookstore-api-golang/utils"
-	"github.com/spf13/viper"
 )
 
 func main() {
@@ -19,15 +18,15 @@ func main() {
 	if err != nil {
 		utils.Log.Fatalf("Not able to connect to database %s", err)
 	} else {
-		utils.Log.Info("Connected to database")
+		utils.Log.Info("Connected to database " + utils.Config.DbName)
 	}
 
 	router := mux.NewRouter()
 	apiSubrouter := router.PathPrefix("/api").Subrouter()
 	routes.InitializeBookRoutes(apiSubrouter)
 	routes.InitializeAuthorRoutes(apiSubrouter)
+	utils.Log.Info("Finished initializing routes")
 
-	port := viper.Get("PORT").(string)
-	utils.Log.Info("Server ready and listening on port " + port)
-	utils.Log.Fatal(http.ListenAndServe(":"+port, router))
+	utils.Log.Info("Server ready and listening on port " + utils.Config.Port)
+	utils.Log.Fatal(http.ListenAndServe(":"+utils.Config.Port, router))
 }

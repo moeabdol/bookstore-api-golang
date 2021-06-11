@@ -1,9 +1,6 @@
 package utils
 
-import (
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-)
+import log "github.com/sirupsen/logrus"
 
 // Log is the logger global variable
 var Log *log.Logger
@@ -17,8 +14,7 @@ func InitializeLogger() {
 		PadLevelText:  true,
 	})
 
-	environment := viper.Get("ENVIRONMENT").(string)
-	if environment == "development" {
+	if Config.Environment == "development" {
 		Log.SetLevel(log.DebugLevel)
 		Log.Info("Server running in development mode")
 	} else {

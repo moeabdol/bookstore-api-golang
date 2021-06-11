@@ -5,7 +5,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/moeabdol/bookstore-api-golang/controllers"
-	"github.com/moeabdol/bookstore-api-golang/utils"
 )
 
 // InitializeBookRoutes function
@@ -15,6 +14,4 @@ func InitializeBookRoutes(r *mux.Router) {
 	r.HandleFunc("/books/{id}", controllers.GetBook).Methods(http.MethodGet)
 	r.HandleFunc("/books/{id}", controllers.UpdateBook).Methods(http.MethodPut)
 	r.HandleFunc("/books/{id}", controllers.DeleteBook).Methods(http.MethodDelete)
-
-	utils.Log.Info("Finished initilizing book routes")
 }
