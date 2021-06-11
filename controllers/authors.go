@@ -29,3 +29,37 @@ func CreateAuthor(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(result)
 	}
 }
+
+// ListAuthors function - GET /authos
+func ListAuthors(w http.ResponseWriter, r *http.Request) {
+	limit := r.URL.Query().Get("limit")
+	if limit == "" {
+		limit = "10"
+	}
+	l := utils.StrToInt32(limit)
+
+	offset := r.URL.Query().Get("offset")
+	if offset == "" {
+		offset = "0"
+	}
+	o := utils.StrToInt32(offset) * l
+
+	var listAuthorsParams = db.ListAuthorsParams{
+		Limit:  l,
+		Offset: o,
+	}
+
+	utils.Log.WithFields(log.Fields{
+		"limit":  listAuthorsParams.Limit,
+		"offset": listAuthorsParams.Offset,
+	}).Debugf("%s %s - controllers/authors.go - ListAuthors() -", r.Method, r.URL)
+
+	authors, err := db.DB.ListAuthors(r.Context(), listAuthorsParams)
+	if err != nil {
+		utils.Log.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(authors)
+	}
+}

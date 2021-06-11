@@ -4,3 +4,9 @@ INSERT INTO authors (
 ) VALUES (
   $1
 ) RETURNING *;
+
+-- name: ListAuthors :many
+SELECT * FROM authors
+ORDER By name
+LIMIT $1
+OFFSET $2;

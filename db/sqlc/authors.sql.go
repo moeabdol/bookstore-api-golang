@@ -26,3 +26,43 @@ func (q *Queries) CreateAuthor(ctx context.Context, name string) (Author, error)
 	)
 	return i, err
 }
+
+const listAuthors = `-- name: ListAuthors :many
+SELECT id, name, created_at, updated_at FROM authors
+ORDER By name
+LIMIT $1
+OFFSET $2
+`
+
+type ListAuthorsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListAuthors(ctx context.Context, arg ListAuthorsParams) ([]Author, error) {
+	rows, err := q.db.QueryContext(ctx, listAuthors, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Author{}
+	for rows.Next() {
+		var i Author
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

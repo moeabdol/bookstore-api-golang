@@ -11,6 +11,7 @@ import (
 // InitializeAuthorRoutes function
 func InitializeAuthorRoutes(r *mux.Router) {
 	r.HandleFunc("/authors", controllers.CreateAuthor).Methods(http.MethodPost)
+	r.HandleFunc("/authors", controllers.ListAuthors).Methods(http.MethodGet)
 
 	utils.Log.Info("Finished initilizing author routes")
 }
