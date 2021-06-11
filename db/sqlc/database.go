@@ -5,31 +5,23 @@ import (
 	"fmt"
 
 	_ "github.com/lib/pq"
-	"github.com/spf13/viper"
+	"github.com/moeabdol/bookstore-api-golang/utils"
 )
 
-var DB *Queries
+var DB *Store
 
 // ConnectToDatabase function
 func ConnectToDatabase() error {
-	dbDialect := viper.Get("DB_DIALECT").(string)
-	dbHost := viper.Get("DB_HOST").(string)
-	dbPort := viper.Get("DB_PORT").(string)
-	dbSslMode := viper.Get("DB_SSLMODE").(string)
-	dbName := viper.Get("DB_NAME").(string)
-	dbUser := viper.Get("DB_USER").(string)
-	dbPassword := viper.Get("DB_PASSWORD").(string)
-
 	conn, err := sql.Open(
-		dbDialect,
+		utils.Config.DbDialect,
 		fmt.Sprintf(
 			"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-			dbHost,
-			dbPort,
-			dbUser,
-			dbPassword,
-			dbName,
-			dbSslMode,
+			utils.Config.DbHost,
+			utils.Config.DbPort,
+			utils.Config.DbUser,
+			utils.Config.DbPassword,
+			utils.Config.DbName,
+			utils.Config.DbSslMode,
 		),
 	)
 	if err != nil {
@@ -41,6 +33,6 @@ func ConnectToDatabase() error {
 		return err
 	}
 
-	DB = New(conn)
+	DB = NewStore(conn)
 	return nil
 }
