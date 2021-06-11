@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/mux"
 	db "github.com/moeabdol/bookstore-api-golang/db/sqlc"
@@ -10,15 +9,6 @@ import (
 	"github.com/moeabdol/bookstore-api-golang/utils"
 	"github.com/spf13/viper"
 )
-
-func mount(r *mux.Router, path string, handler http.Handler) {
-	r.PathPrefix(path).Handler(
-		http.StripPrefix(
-			strings.TrimSuffix(path, "/"),
-			handler,
-		),
-	)
-}
 
 func main() {
 	utils.ReadConfig()
@@ -32,10 +22,12 @@ func main() {
 		utils.Log.Info("Connected to database")
 	}
 
-	r := mux.NewRouter()
-	mount(r, "/api", routes.BooksRouter())
+	router := mux.NewRouter()
+	apiSubrouter := router.PathPrefix("/api").Subrouter()
+	routes.InitializeBookRoutes(apiSubrouter)
+	routes.InitializeAuthorRoutes(apiSubrouter)
 
 	port := viper.Get("PORT").(string)
 	utils.Log.Info("Server ready and listening on port " + port)
-	utils.Log.Fatal(http.ListenAndServe(":"+port, r))
+	utils.Log.Fatal(http.ListenAndServe(":"+port, router))
 }

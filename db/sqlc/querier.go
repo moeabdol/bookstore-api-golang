@@ -7,6 +7,7 @@ import (
 )
 
 type Querier interface {
+	CreateAuthor(ctx context.Context, name string) (Author, error)
 	CreateBook(ctx context.Context, title string) (Book, error)
 	DeleteBook(ctx context.Context, id int64) error
 	GetBook(ctx context.Context, id int64) (Book, error)

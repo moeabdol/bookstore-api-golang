@@ -12,7 +12,7 @@ INSERT INTO books (
   title
 ) VALUES (
   $1
-) RETURNING id, title, created_at, updated_at
+) RETURNING id, title, created_at, updated_at, author_id
 `
 
 func (q *Queries) CreateBook(ctx context.Context, title string) (Book, error) {
@@ -23,6 +23,7 @@ func (q *Queries) CreateBook(ctx context.Context, title string) (Book, error) {
 		&i.Title,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AuthorID,
 	)
 	return i, err
 }
@@ -38,7 +39,7 @@ func (q *Queries) DeleteBook(ctx context.Context, id int64) error {
 }
 
 const getBook = `-- name: GetBook :one
-SELECT id, title, created_at, updated_at FROM books
+SELECT id, title, created_at, updated_at, author_id FROM books
 WHERE id = $1
 LIMIT 1
 `
@@ -51,12 +52,13 @@ func (q *Queries) GetBook(ctx context.Context, id int64) (Book, error) {
 		&i.Title,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AuthorID,
 	)
 	return i, err
 }
 
 const listBooks = `-- name: ListBooks :many
-SELECT id, title, created_at, updated_at FROM books
+SELECT id, title, created_at, updated_at, author_id FROM books
 ORDER BY created_at
 LIMIT $1
 OFFSET $2
@@ -81,6 +83,7 @@ func (q *Queries) ListBooks(ctx context.Context, arg ListBooksParams) ([]Book, e
 			&i.Title,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.AuthorID,
 		); err != nil {
 			return nil, err
 		}
@@ -99,7 +102,7 @@ const updateBook = `-- name: UpdateBook :one
 UPDATE books
 SET title = $2, updated_at = now()
 WHERE id = $1
-RETURNING id, title, created_at, updated_at
+RETURNING id, title, created_at, updated_at, author_id
 `
 
 type UpdateBookParams struct {
@@ -115,6 +118,7 @@ func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) (Book, e
 		&i.Title,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AuthorID,
 	)
 	return i, err
 }
