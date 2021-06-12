@@ -17,11 +17,18 @@ func main() {
 	utils.Log.Info("Connected to database " + utils.Config.DBName)
 
 	r := mux.NewRouter()
+	// User routes
+	r.HandleFunc("/api/users", controllers.CreateUser).Methods(http.MethodPost)
+	r.HandleFunc("/api/users/{id}", controllers.GetUser).Methods(http.MethodGet)
+
+	// Book routes
 	r.HandleFunc("/api/books", controllers.CreateBook).Methods(http.MethodPost)
 	r.HandleFunc("/api/books", controllers.ListBooks).Methods(http.MethodGet)
 	r.HandleFunc("/api/books/{id}", controllers.GetBook).Methods(http.MethodGet)
 	r.HandleFunc("/api/books/{id}", controllers.UpdateBook).Methods(http.MethodPut)
 	r.HandleFunc("/api/books/{id}", controllers.DeleteBook).Methods(http.MethodDelete)
+
+	// Author routes
 	r.HandleFunc("/api/authors", controllers.CreateAuthor).Methods(http.MethodPost)
 	r.HandleFunc("/api/authors", controllers.ListAuthors).Methods(http.MethodGet)
 	r.HandleFunc("/api/authors/{id}", controllers.GetAuthor).Methods(http.MethodGet)

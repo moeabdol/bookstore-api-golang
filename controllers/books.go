@@ -15,6 +15,7 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 	var createBookParams db.CreateBookParams
 	if err := json.NewDecoder(r.Body).Decode(&createBookParams); err != nil {
 		utils.Log.Error("Unable to decode request body")
+		w.WriteHeader(http.StatusBadRequest)
 	}
 
 	utils.Log.WithFields(log.Fields{

@@ -15,6 +15,7 @@ func CreateAuthor(w http.ResponseWriter, r *http.Request) {
 	var author db.Author
 	if err := json.NewDecoder(r.Body).Decode(&author); err != nil {
 		utils.Log.Error("Unable to decode request body")
+		w.WriteHeader(http.StatusBadRequest)
 	}
 
 	utils.Log.WithFields(log.Fields{
