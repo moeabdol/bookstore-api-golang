@@ -1,0 +1,4 @@
+ALTER TABLE IF EXISTS "books" DROP CONSTRAINT IF EXISTS "books_author_id_fkey";
+ALTER TABLE IF EXISTS "books" DROP COLUMN IF EXISTS "author_id";
+
+DROP TABLE IF EXISTS "authors";
