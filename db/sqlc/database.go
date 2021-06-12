@@ -11,28 +11,27 @@ import (
 var DB *Store
 
 // ConnectToDatabase function
-func ConnectToDatabase() error {
+func ConnectToDatabase() {
 	conn, err := sql.Open(
-		utils.Config.DbDialect,
+		utils.Config.DBDialect,
 		fmt.Sprintf(
 			"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-			utils.Config.DbHost,
-			utils.Config.DbPort,
-			utils.Config.DbUser,
-			utils.Config.DbPassword,
-			utils.Config.DbName,
-			utils.Config.DbSslMode,
+			utils.Config.DBHost,
+			utils.Config.DBPort,
+			utils.Config.DBUser,
+			utils.Config.DBPassword,
+			utils.Config.DBName,
+			utils.Config.DBSslmode,
 		),
 	)
 	if err != nil {
-		return err
+		utils.Log.Fatalf("Unable to connect to database %s", err)
 	}
 
 	err = conn.Ping()
 	if err != nil {
-		return err
+		utils.Log.Fatalf("Unable to connect to database %s", err)
 	}
 
 	DB = NewStore(conn)
-	return nil
 }

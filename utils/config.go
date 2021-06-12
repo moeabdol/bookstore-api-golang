@@ -1,29 +1,28 @@
 package utils
 
 import (
-	"log"
-
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 // ConfigStruct type
 type ConfigStruct struct {
-	Environment string
-	Port        string
-	DbDialect   string
-	DbHost      string
-	DbPort      string
-	DbSslMode   string
-	DbName      string
-	DbUser      string
-	DbPassword  string
+	Environment string `mapstructure:"ENVIRONMENT"`
+	Port        string `mapstructure:"PORT"`
+	DBDialect   string `mapstructure:"DB_DIALECT"`
+	DBHost      string `mapstructure:"DB_HOST"`
+	DBPort      string `mapstructure:"DB_PORT"`
+	DBSslmode   string `mapstructure:"DB_SSLMODE"`
+	DBName      string `mapstructure:"DB_NAME"`
+	DBUser      string `mapstructure:"DB_USER"`
+	DBPassword  string `mapstructure:"DB_PASSWORD"`
 }
 
 // Config global variable
-var Config ConfigStruct
+var Config *ConfigStruct
 
-// ReadConfig function to read .env file
-func ReadConfig() {
+// LoadConfig function to read .env configuration file
+func LoadConfig() {
 	viper.SetConfigFile(".env")
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -33,13 +32,9 @@ func ReadConfig() {
 		}
 	}
 
-	Config.Environment = viper.Get("Environment").(string)
-	Config.Port = viper.Get("PORT").(string)
-	Config.DbDialect = viper.Get("DB_DIALECT").(string)
-	Config.DbHost = viper.Get("DB_HOST").(string)
-	Config.DbPort = viper.Get("DB_PORT").(string)
-	Config.DbSslMode = viper.Get("DB_SSLMODE").(string)
-	Config.DbName = viper.Get("DB_NAME").(string)
-	Config.DbUser = viper.Get("DB_USER").(string)
-	Config.DbPassword = viper.Get("DB_PASSWORD").(string)
+	viper.AutomaticEnv() // Override config file with environment variables
+
+	if err := viper.Unmarshal(&Config); err != nil {
+		log.Fatal("Unable to read config file")
+	}
 }
