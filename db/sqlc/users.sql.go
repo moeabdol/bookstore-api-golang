@@ -15,7 +15,7 @@ INSERT INTO users (
   email
 ) VALUES (
   $1, $2, $3
-) RETURNING id, username, password, email, created_at, updated_at
+) RETURNING id, username, email, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -24,13 +24,20 @@ type CreateUserParams struct {
 	Email    string `json:"email"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+type CreateUserRow struct {
+	ID        int64     `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
 	row := q.db.QueryRowContext(ctx, createUser, arg.Username, arg.Password, arg.Email)
-	var i User
+	var i CreateUserRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
-		&i.Password,
 		&i.Email,
 		&i.CreatedAt,
 		&i.UpdatedAt,

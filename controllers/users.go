@@ -12,7 +12,7 @@ import (
 
 type createUserRequest struct {
 	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Password string `json:"password" validate:"required,min=6"`
 	Email    string `json:"email" validate:"required,email"`
 }
 
@@ -57,9 +57,16 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		utils.Log.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	user, err := db.DB.CreateUser(r.Context(), db.CreateUserParams{
 		Username: req.Username,
-		Password: req.Password,
+		Password: hashedPassword,
 		Email:    req.Email,
 	})
 	if err != nil {
