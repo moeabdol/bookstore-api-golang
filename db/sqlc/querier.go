@@ -7,11 +7,14 @@ import (
 )
 
 type Querier interface {
+	AuthorIDExists(ctx context.Context, id int64) (int64, error)
+	BookTitleExists(ctx context.Context, title string) (int64, error)
 	CreateAuthor(ctx context.Context, name string) (Author, error)
 	CreateBook(ctx context.Context, arg CreateBookParams) (Book, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteAuthor(ctx context.Context, id int64) error
 	DeleteBook(ctx context.Context, id int64) error
+	EmailExists(ctx context.Context, email string) (int64, error)
 	GetAuthor(ctx context.Context, arg GetAuthorParams) (GetAuthorRow, error)
 	GetBook(ctx context.Context, id int64) (GetBookRow, error)
 	GetUser(ctx context.Context, id int64) (GetUserRow, error)

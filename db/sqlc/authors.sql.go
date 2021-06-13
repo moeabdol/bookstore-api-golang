@@ -9,6 +9,19 @@ import (
 	"time"
 )
 
+const authorIDExists = `-- name: AuthorIDExists :one
+SELECT COUNT(*)
+FROM authors
+WHERE id = $1
+`
+
+func (q *Queries) AuthorIDExists(ctx context.Context, id int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, authorIDExists, id)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createAuthor = `-- name: CreateAuthor :one
 INSERT INTO authors (
   name

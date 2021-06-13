@@ -10,26 +10,48 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type createAuthorRequest struct {
+	Name string `json:"name" validate:"required,min=3,max=255"`
+}
+
+type updateAuthorRequest struct {
+	Name string `json:"name" validate:"required,min=3,max=255"`
+}
+
 // CreateAuthor function - POST /authors
 func CreateAuthor(w http.ResponseWriter, r *http.Request) {
-	var author db.Author
-	if err := json.NewDecoder(r.Body).Decode(&author); err != nil {
+	var req createAuthorRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		utils.Log.Error("Unable to decode request body")
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	utils.Log.WithFields(log.Fields{
-		"name": author.Name,
+		"name": req.Name,
 	}).Debugf("%s %s - controllers/authors.go - CreateAuthor() -", r.Method, r.URL)
 
-	result, err := db.DB.CreateAuthor(r.Context(), author.Name)
+	valErrors := utils.ValidateStruct(req)
+	if len(valErrors) != 0 {
+		utils.Log.Errorf("Validation errors: %s", valErrors)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string][]string{
+			"errors": valErrors,
+		})
+		return
+	}
+
+	result, err := db.DB.CreateAuthor(r.Context(), req.Name)
 	if err != nil {
 		utils.Log.Error(err)
 		w.WriteHeader(http.StatusBadRequest)
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(result)
+		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(result)
 }
 
 // ListAuthors function - GET /authos
@@ -46,28 +68,31 @@ func ListAuthors(w http.ResponseWriter, r *http.Request) {
 	}
 	o := utils.StrToInt32(offset) * l
 
-	var listAuthorsParams = db.ListAuthorsParams{
-		Limit:  l,
-		Offset: o,
-	}
-
 	utils.Log.WithFields(log.Fields{
-		"limit":  listAuthorsParams.Limit,
-		"offset": listAuthorsParams.Offset,
+		"limit":  l,
+		"offset": o,
 	}).Debugf("%s %s - controllers/authors.go - ListAuthors() -", r.Method, r.URL)
 
-	authors, err := db.DB.ListAuthors(r.Context(), listAuthorsParams)
+	authors, err := db.DB.ListAuthors(r.Context(), db.ListAuthorsParams{
+		Limit:  l,
+		Offset: o,
+	})
 	if err != nil {
 		utils.Log.Error(err)
 		w.WriteHeader(http.StatusBadRequest)
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(authors)
+		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(authors)
 }
 
 // GetAuthor function - GET /authors/{id}
 func GetAuthor(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	authorID := utils.StrToInt64(id)
+
 	limit := r.URL.Query().Get("limit")
 	if limit == "" {
 		limit = "10"
@@ -80,28 +105,29 @@ func GetAuthor(w http.ResponseWriter, r *http.Request) {
 	}
 	o := utils.StrToInt32(offset) * l
 
-	id := mux.Vars(r)["id"]
-	authorID := utils.StrToInt64(id)
+	utils.Log.WithFields(log.Fields{
+		"limit":  l,
+		"offset": o,
+	}).Debugf("%s %s - controllers/authors.go - GetAuthor() -", r.Method, r.URL)
 
-	var getAuthorParams = db.GetAuthorParams{
+	author, err := db.DB.GetAuthor(r.Context(), db.GetAuthorParams{
 		ID:     authorID,
 		Limit:  l,
 		Offset: o,
-	}
-
-	utils.Log.WithFields(log.Fields{
-		"limit":  getAuthorParams.Limit,
-		"offset": getAuthorParams.Offset,
-	}).Debugf("%s %s - controllers/authors.go - GetAuthor() -", r.Method, r.URL)
-
-	author, err := db.DB.GetAuthor(r.Context(), getAuthorParams)
-	if err != nil {
-		utils.Log.Error(err)
+	})
+	if author.ID == 0 {
+		utils.Log.Errorf("AuthorID: %s does not exist!", id)
 		w.WriteHeader(http.StatusNotFound)
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(author)
+		return
+	} else if err != nil {
+		utils.Log.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(author)
 }
 
 // UpdateAuthor function - PUT /authors/{id}
@@ -109,28 +135,41 @@ func UpdateAuthor(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	authorID := utils.StrToInt64(id)
 
-	var author db.Author
-	if err := json.NewDecoder(r.Body).Decode(&author); err != nil {
+	var req updateAuthorRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		utils.Log.Error("Unable to decode request body")
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	utils.Log.WithFields(log.Fields{
-		"name": author.Name,
+		"name": req.Name,
 	}).Debugf("%s %s - controllers/authors.go - UpdateAuthor() -", r.Method, r.URL)
 
-	var updateAuthorParams = db.UpdateAuthorParams{
-		ID:   authorID,
-		Name: author.Name,
+	valErrors := utils.ValidateStruct(req)
+	if len(valErrors) != 0 {
+		utils.Log.Errorf("Validation errors: %s", valErrors)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string][]string{
+			"errors": valErrors,
+		})
+		return
 	}
 
-	result, err := db.DB.UpdateAuthor(r.Context(), updateAuthorParams)
+	result, err := db.DB.UpdateAuthor(r.Context(), db.UpdateAuthorParams{
+		ID:   authorID,
+		Name: req.Name,
+	})
 	if err != nil {
 		utils.Log.Error(err)
 		w.WriteHeader(http.StatusBadRequest)
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(result)
+		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
 }
 
 // DeleteAuthor function - DELETE /authors/{id}
@@ -143,7 +182,8 @@ func DeleteAuthor(w http.ResponseWriter, r *http.Request) {
 	if err := db.DB.DeleteAuthor(r.Context(), authorID); err != nil {
 		utils.Log.Error(err)
 		w.WriteHeader(http.StatusBadRequest)
-	} else {
-		w.WriteHeader(http.StatusOK)
+		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 }

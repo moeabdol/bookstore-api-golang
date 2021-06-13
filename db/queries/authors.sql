@@ -37,3 +37,8 @@ RETURNING *;
 -- name: DeleteAuthor :exec
 DELETE FROM authors
 WHERE id = $1;
+
+-- name: AuthorIDExists :one
+SELECT COUNT(*)
+FROM authors
+WHERE id = $1;

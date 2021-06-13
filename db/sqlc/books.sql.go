@@ -8,6 +8,19 @@ import (
 	"time"
 )
 
+const bookTitleExists = `-- name: BookTitleExists :one
+SELECT COUNT(*)
+FROM books
+WHERE title = $1
+`
+
+func (q *Queries) BookTitleExists(ctx context.Context, title string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, bookTitleExists, title)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createBook = `-- name: CreateBook :one
 INSERT INTO books (
   title,
@@ -133,18 +146,19 @@ func (q *Queries) ListBooks(ctx context.Context, arg ListBooksParams) ([]ListBoo
 
 const updateBook = `-- name: UpdateBook :one
 UPDATE books
-SET title = $2, updated_at = now()
+SET title = $2, author_id = $3, updated_at = now()
 WHERE id = $1
 RETURNING id, title, created_at, updated_at, author_id
 `
 
 type UpdateBookParams struct {
-	ID    int64  `json:"id"`
-	Title string `json:"title"`
+	ID       int64  `json:"id"`
+	Title    string `json:"title"`
+	AuthorID int64  `json:"author_id"`
 }
 
 func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) (Book, error) {
-	row := q.db.QueryRowContext(ctx, updateBook, arg.ID, arg.Title)
+	row := q.db.QueryRowContext(ctx, updateBook, arg.ID, arg.Title, arg.AuthorID)
 	var i Book
 	err := row.Scan(
 		&i.ID,
