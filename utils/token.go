@@ -76,8 +76,6 @@ func CreateToken(username string, duration time.Duration, privateKeyPath string)
 
 // VerifyToken function checks if the token is valid or not
 func VerifyToken(token string, publicKeyPath string) (*Payload, error) {
-	token = token[7:]
-
 	publicKeyBytes, err := ioutil.ReadFile(publicKeyPath)
 	if err != nil {
 		return nil, err

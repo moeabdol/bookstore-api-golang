@@ -18,7 +18,7 @@ func main() {
 	utils.Log.Info("Connected to database " + utils.Config.DBName)
 
 	r := mux.NewRouter()
-	r.Use(middleware.RequestLogger)
+	r.Use(middleware.RequestLoggerMiddleware)
 
 	// User routes
 	authRoutes := r.PathPrefix("/api/auth").Subrouter()
@@ -28,6 +28,7 @@ func main() {
 	userRoutes := r.PathPrefix("/api/users").Subrouter()
 	userRoutes.HandleFunc("", controllers.CreateUser).Methods(http.MethodPost)
 	userRoutes.HandleFunc("/{id}", controllers.GetUser).Methods(http.MethodGet)
+	userRoutes.Use(middleware.AuthMiddleware)
 
 	// Book routes
 	bookRoutes := r.PathPrefix("/api/books").Subrouter()
@@ -36,6 +37,7 @@ func main() {
 	bookRoutes.HandleFunc("/{id}", controllers.GetBook).Methods(http.MethodGet)
 	bookRoutes.HandleFunc("/{id}", controllers.UpdateBook).Methods(http.MethodPut)
 	bookRoutes.HandleFunc("/{id}", controllers.DeleteBook).Methods(http.MethodDelete)
+	bookRoutes.Use(middleware.AuthMiddleware)
 
 	// Author routes
 	authorRoutes := r.PathPrefix("/api/authors").Subrouter()
@@ -44,6 +46,7 @@ func main() {
 	authorRoutes.HandleFunc("/{id}", controllers.GetAuthor).Methods(http.MethodGet)
 	authorRoutes.HandleFunc("/{id}", controllers.UpdateAuthor).Methods(http.MethodPut)
 	authorRoutes.HandleFunc("/{id}", controllers.DeleteAuthor).Methods(http.MethodDelete)
+	authorRoutes.Use(middleware.AuthMiddleware)
 	utils.Log.Info("Finished initializing routes")
 
 	utils.Log.Info("Server ready and listening on port " + utils.Config.Port)
