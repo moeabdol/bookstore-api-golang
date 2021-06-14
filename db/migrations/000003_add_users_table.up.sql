@@ -6,3 +6,6 @@ CREATE TABLE "users" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );
+
+CREATE INDEX ON "users" ("username");
+CREATE INDEX ON "users" ("email");
