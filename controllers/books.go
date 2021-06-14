@@ -33,7 +33,7 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 	utils.Log.WithFields(log.Fields{
 		"title":     req.Title,
 		"author_id": req.AuthorID,
-	}).Debugf("%s %s - controllers/books.go - CreateBook() -", r.Method, r.URL)
+	}).Debugf("controllers/books.go - CreateBook() -")
 
 	valErrors := utils.ValidateStruct(req)
 	if len(valErrors) != 0 {
@@ -75,10 +75,7 @@ func ListBooks(w http.ResponseWriter, r *http.Request) {
 	}
 	o := utils.StrToInt32(offset) * l
 
-	utils.Log.WithFields(log.Fields{
-		"limit":  l,
-		"offset": o,
-	}).Debugf("%s %s - controllers/books.go - ListBooks() -", r.Method, r.URL)
+	utils.Log.Debugf("controllers/books.go - ListBooks()")
 
 	books, err := db.DB.ListBooks(r.Context(), db.ListBooksParams{
 		Limit:  l,
@@ -100,7 +97,7 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	bookID := utils.StrToInt64(id)
 
-	utils.Log.Debugf("%s %s - controllers/books.go - GetBook()", r.Method, r.URL)
+	utils.Log.Debugf("controllers/books.go - GetBook()")
 
 	book, err := db.DB.GetBook(r.Context(), bookID)
 	if book.ID == 0 {
@@ -133,7 +130,7 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 	utils.Log.WithFields(log.Fields{
 		"title":     req.Title,
 		"author_id": req.AuthorID,
-	}).Debugf("%s %s - controllers/books.go - UpdateBook() -", r.Method, r.URL)
+	}).Debugf("controllers/books.go - UpdateBook() -")
 
 	valErrors := utils.ValidateStruct(req)
 	if len(valErrors) != 0 {
@@ -197,7 +194,7 @@ func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	bookID := utils.StrToInt64(id)
 
-	utils.Log.Debugf("%s %s - controllers/books.go - DeleteBook()", r.Method, r.URL)
+	utils.Log.Debugf("controllers/books.go - DeleteBook()")
 
 	if err := db.DB.DeleteBook(r.Context(), bookID); err != nil {
 		utils.Log.Error(err)

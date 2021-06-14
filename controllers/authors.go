@@ -29,7 +29,7 @@ func CreateAuthor(w http.ResponseWriter, r *http.Request) {
 
 	utils.Log.WithFields(log.Fields{
 		"name": req.Name,
-	}).Debugf("%s %s - controllers/authors.go - CreateAuthor() -", r.Method, r.URL)
+	}).Debugf("controllers/authors.go - CreateAuthor() -")
 
 	valErrors := utils.ValidateStruct(req)
 	if len(valErrors) != 0 {
@@ -68,10 +68,7 @@ func ListAuthors(w http.ResponseWriter, r *http.Request) {
 	}
 	o := utils.StrToInt32(offset) * l
 
-	utils.Log.WithFields(log.Fields{
-		"limit":  l,
-		"offset": o,
-	}).Debugf("%s %s - controllers/authors.go - ListAuthors() -", r.Method, r.URL)
+	utils.Log.Debugf("controllers/authors.go - ListAuthors()")
 
 	authors, err := db.DB.ListAuthors(r.Context(), db.ListAuthorsParams{
 		Limit:  l,
@@ -105,10 +102,7 @@ func GetAuthor(w http.ResponseWriter, r *http.Request) {
 	}
 	o := utils.StrToInt32(offset) * l
 
-	utils.Log.WithFields(log.Fields{
-		"limit":  l,
-		"offset": o,
-	}).Debugf("%s %s - controllers/authors.go - GetAuthor() -", r.Method, r.URL)
+	utils.Log.Debugf("controllers/authors.go - GetAuthor()")
 
 	author, err := db.DB.GetAuthor(r.Context(), db.GetAuthorParams{
 		ID:     authorID,
@@ -144,7 +138,7 @@ func UpdateAuthor(w http.ResponseWriter, r *http.Request) {
 
 	utils.Log.WithFields(log.Fields{
 		"name": req.Name,
-	}).Debugf("%s %s - controllers/authors.go - UpdateAuthor() -", r.Method, r.URL)
+	}).Debugf("controllers/authors.go - UpdateAuthor() -")
 
 	valErrors := utils.ValidateStruct(req)
 	if len(valErrors) != 0 {
@@ -177,7 +171,7 @@ func DeleteAuthor(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	authorID := utils.StrToInt64(id)
 
-	utils.Log.Debugf("%s %s - controllers/authors.go - DeleteAuthor()", r.Method, r.URL)
+	utils.Log.Debugf("controllers/authors.go - DeleteAuthor()")
 
 	if err := db.DB.DeleteAuthor(r.Context(), authorID); err != nil {
 		utils.Log.Error(err)
