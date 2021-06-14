@@ -18,6 +18,7 @@ type Querier interface {
 	GetAuthor(ctx context.Context, arg GetAuthorParams) (GetAuthorRow, error)
 	GetBook(ctx context.Context, id int64) (GetBookRow, error)
 	GetUser(ctx context.Context, id int64) (GetUserRow, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
 	ListAuthors(ctx context.Context, arg ListAuthorsParams) ([]Author, error)
 	ListBooks(ctx context.Context, arg ListBooksParams) ([]ListBooksRow, error)
 	UpdateAuthor(ctx context.Context, arg UpdateAuthorParams) (Author, error)

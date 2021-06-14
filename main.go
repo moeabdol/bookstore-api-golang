@@ -20,6 +20,7 @@ func main() {
 	// User routes
 	r.HandleFunc("/api/users", controllers.CreateUser).Methods(http.MethodPost)
 	r.HandleFunc("/api/users/{id}", controllers.GetUser).Methods(http.MethodGet)
+	r.HandleFunc("/api/users/login", controllers.LoginUser).Methods(http.MethodPost)
 
 	// Book routes
 	r.HandleFunc("/api/books", controllers.CreateBook).Methods(http.MethodPost)

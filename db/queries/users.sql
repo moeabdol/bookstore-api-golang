@@ -13,6 +13,12 @@ FROM users
 WHERE id = $1
 LIMIT 1;
 
+-- name: GetUserByEmail :one
+SELECT *
+FROM users
+WHERE email = $1
+LIMIT 1;
+
 -- name: EmailExists :one
 SELECT COUNT(*)
 FROM users
